@@ -74,9 +74,104 @@
     setTimeout(end, ms + 90);
   }
 
-  /* ---------- zoom dialog (one at a time, created on open, removed on close) ---------- */
+  /* ---------- zoom dialog (one at a time, created on open, removed on close) ----------
+     Opens by growing from the original window's rectangle and closes by shrinking back to it (FLIP).
+     Only transform, clip-path and opacity are animated, with a uniform scale (text is never stretched):
+     the frame is scaled by width and cropped to the origin height with clip-path, the body fades. */
 
-  var zoom = null;
+  var zoom = null;               // { dlg, win, opener, state, anims, token, timer, animated }
+  var OPEN_MS = 300, CLOSE_MS = 260, BACKDROP_MS = 240, FALLBACK_MS = 450;
+  var OPEN_EASE = 'cubic-bezier(.2,.9,.25,1.05)';
+  var CLOSE_EASE = 'cubic-bezier(.4,0,1,1)';
+
+  function visibleRect(win) {
+    var r = win.getBoundingClientRect();
+    var ok = !win.hidden && r.width > 1 && r.height > 1 && r.bottom > 0 && r.right > 0 &&
+      r.top < window.innerHeight && r.left < window.innerWidth;
+    return ok ? r : null;
+  }
+
+  // Animation state for the dialog box f (un-animated rect) placed over the original window's rectangle.
+  function originState(win, f, radius, measured) {
+    var full = 'inset(0px 0px 0px 0px round ' + radius + 'px)';
+    var o = measured === undefined ? visibleRect(win) : measured;
+    if (!o) {                    // original off-screen or hidden: shrink + fade in place
+      var k = 0.9;
+      return { transform: 'translate(' + (f.width * (1 - k) / 2) + 'px,' + (f.height * (1 - k) / 2) + 'px) scale(' + k + ')', clipPath: full, opacity: 0 };
+    }
+    // one uniform scale that covers the origin on both axes; clip-path crops the frame to the origin's exact size
+    var s = Math.max(o.width / f.width, o.height / f.height);
+    return {
+      transform: 'translate(' + (o.left - f.left) + 'px,' + (o.top - f.top) + 'px) scale(' + s + ')',
+      clipPath: 'inset(0px ' + Math.max(0, f.width - o.width / s).toFixed(2) + 'px ' + Math.max(0, f.height - o.height / s).toFixed(2) + 'px 0px round ' + radius + 'px)',
+      opacity: 1
+    };
+  }
+
+  function cancelAnims(z) {
+    clearTimeout(z.timer);
+    z.token++;
+    (z.anims || []).forEach(function (a) { try { a.cancel(); } catch (e) {} });
+    z.anims = [];
+  }
+
+  // Runs frame + backdrop + body fade together; onEnd fires once, via 'finished' or the fallback timer.
+  function runZoom(z, opening, from, to, backdrop, bodyFrom, onEnd) {
+    var dlg = z.dlg, token = ++z.token, dur = opening ? OPEN_MS : CLOSE_MS;
+    var bodyEl = dlg.querySelector('.window__body');
+    var anims = [dlg.animate([from, to], { duration: dur, easing: opening ? OPEN_EASE : CLOSE_EASE, fill: 'both' })];
+    try {
+      anims.push(dlg.animate([{ opacity: backdrop[0] }, { opacity: backdrop[1] }],
+        { duration: opening ? BACKDROP_MS : CLOSE_MS, easing: opening ? 'ease-out' : 'ease-in', fill: 'both', pseudoElement: '::backdrop' }));
+    } catch (e) { /* no pseudo-element animation support: the backdrop just appears / disappears */ }
+    if (bodyEl) {
+      anims.push(bodyEl.animate(opening
+        ? [{ opacity: 0, offset: 0 }, { opacity: 1, offset: 0.6 }, { opacity: 1, offset: 1 }]
+        : [{ opacity: bodyFrom, offset: 0 }, { opacity: 0, offset: 0.4 }, { opacity: 0, offset: 1 }],
+        { duration: dur, easing: 'linear', fill: 'both' }));
+    }
+    z.anims = anims;
+    var done = false;
+    function end() {
+      if (done || token !== z.token) return;
+      done = true;
+      clearTimeout(z.timer);
+      onEnd();
+    }
+    Promise.all(anims.map(function (a) { return a.finished; })).then(end, function () {});
+    z.timer = setTimeout(end, FALLBACK_MS);
+  }
+
+  function finalizeZoom(z) {     // runs however the dialog ends (also a native, non-cancelable Esc)
+    if (zoom !== z) return;
+    cancelAnims(z);
+    document.documentElement.classList.remove('zoom-lock');
+    z.win.classList.remove('is-zoom-origin');     // visible again before focus returns to its green button
+    if (z.dlg.parentNode) z.dlg.parentNode.removeChild(z.dlg);
+    zoom = null;
+    if (z.opener && document.contains(z.opener)) z.opener.focus();
+  }
+
+  function closeZoom() {
+    var z = zoom;
+    if (!z || z.state === 'closing') return;
+    var dlg = z.dlg;
+    if (!z.animated || reduceMq.matches || !dlg.open) { if (dlg.open) dlg.close(); else finalizeZoom(z); return; }
+    z.state = 'closing';
+    var cs = getComputedStyle(dlg), bodyEl = dlg.querySelector('.window__body');
+    var radius = parseFloat(cs.borderTopLeftRadius) || 0;
+    var full = 'inset(0px 0px 0px 0px round ' + radius + 'px)';
+    // current visual state (an opening animation may still be running): the close starts exactly there
+    var from = { transform: cs.transform, clipPath: cs.clipPath === 'none' ? full : cs.clipPath, opacity: cs.opacity };
+    var bodyFrom = bodyEl ? getComputedStyle(bodyEl).opacity : 1;
+    var bd = parseFloat(getComputedStyle(dlg, '::backdrop').opacity);
+    cancelAnims(z);
+    dlg.style.overflow = 'hidden';
+    var to = originState(z.win, dlg.getBoundingClientRect(), radius);
+    runZoom(z, false, from, to, [isNaN(bd) ? 1 : bd, 0], bodyFrom, function () {
+      if (dlg.open) dlg.close(); else finalizeZoom(z);     // 'close' event -> finalizeZoom
+    });
+  }
 
   function openZoom(win, opener) {
     if (zoom || !HAS_DIALOG) return;
@@ -86,7 +181,7 @@
     clone.removeAttribute('style');
     clone.removeAttribute('inert');
     clone.removeAttribute('hidden');
-    clone.classList.remove('is-min', 'is-gone', 'is-anim');
+    clone.classList.remove('is-min', 'is-gone', 'is-anim', 'is-zoom-origin');
     clone.querySelectorAll('[id]').forEach(function (n) { n.removeAttribute('id'); });
     var body = clone.querySelector('.window__body');
     if (body) { body.removeAttribute('hidden'); body.removeAttribute('inert'); body.removeAttribute('aria-hidden'); }
@@ -102,32 +197,47 @@
       dots.textContent = '';
       ['red', 'yellow', 'green'].forEach(function (k) {
         var b = dot(k, 'Close zoomed ' + label);
-        b.addEventListener('click', function () { dlg.close(); });
+        b.addEventListener('click', closeZoom);
         dots.appendChild(b);
       });
     }
     dlg.appendChild(clone);
 
+    var z = { dlg: dlg, win: win, opener: opener, state: 'opening', anims: [], token: 0, timer: 0, animated: false };
+
     dlg.addEventListener('click', function (e) {
       if (e.target !== dlg) return;
       var r = dlg.getBoundingClientRect();
-      if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) dlg.close();
+      if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) closeZoom();
     });
-    dlg.addEventListener('close', function () {
-      document.documentElement.classList.remove('zoom-lock');
-      if (dlg.parentNode) dlg.parentNode.removeChild(dlg);
-      zoom = null;
-      if (opener && document.contains(opener)) opener.focus();
+    dlg.addEventListener('cancel', function (e) {      // Esc: run the closing animation instead of closing at once
+      if (e.cancelable) { e.preventDefault(); closeZoom(); }
     });
+    dlg.addEventListener('close', function () { finalizeZoom(z); });
 
-    zoom = dlg;
+    var origin0 = visibleRect(win);                    // what the user sees right now, before the scroll lock can change layout
+    zoom = z;
     document.body.appendChild(dlg);
     document.documentElement.classList.add('zoom-lock');
     try { dlg.showModal(); } catch (err) {
       document.documentElement.classList.remove('zoom-lock');
       dlg.remove();
       zoom = null;
+      return;
     }
+    win.classList.add('is-zoom-origin');               // hidden visually, layout stays
+
+    if (reduceMq.matches || typeof dlg.animate !== 'function') { z.state = 'open'; return; }
+    z.animated = true;
+    var radius = parseFloat(getComputedStyle(dlg).borderTopLeftRadius) || 0;
+    var from = originState(win, dlg.getBoundingClientRect(), radius, origin0);   // measured before any animation exists
+    var full = 'inset(0px 0px 0px 0px round ' + radius + 'px)';
+    dlg.style.overflow = 'hidden';
+    runZoom(z, true, from, { transform: 'none', clipPath: full, opacity: 1 }, [0, 1], 0, function () {
+      cancelAnims(z);
+      dlg.style.overflow = '';
+      if (z.state === 'opening') z.state = 'open';
+    });
   }
 
   /* ---------- per-window controller ---------- */

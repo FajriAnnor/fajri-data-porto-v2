@@ -872,13 +872,13 @@ dialog.zoom {
   overflow: auto;
   overscroll-behavior: contain;
   box-shadow: 0 24px 80px rgba(0, 0, 0, .35);
-  animation: zoom-in .18s ease-out;
+  transform-origin: 0 0;     /* open/close animation (js/windows.js) grows from / shrinks to the original window */
 }
+.window.is-zoom-origin { visibility: hidden; }
 dialog.zoom::backdrop {
   background: rgba(0, 0, 0, .45);
   -webkit-backdrop-filter: blur(3px);
   backdrop-filter: blur(3px);
-  animation: zoom-fade .18s ease-out;
 }
 dialog.zoom .window,
 dialog.zoom .window:hover {
@@ -890,8 +890,6 @@ dialog.zoom .window:hover {
   transition: none;
 }
 dialog.zoom .window__bar { position: sticky; top: 0; z-index: 2; }
-@keyframes zoom-in { from { opacity: 0; transform: scale(.97); } to { opacity: 1; transform: none; } }
-@keyframes zoom-fade { from { opacity: 0; } to { opacity: 1; } }
 @media (max-width: 767px) {
   dialog.zoom {
     width: 100vw; height: 100dvh;
@@ -1118,7 +1116,7 @@ dialog.zoom .window__bar { position: sticky; top: 0; z-index: 2; }
   .window { transition: none; }
   .window:hover { transform: none; }
   .window.is-anim { transition: none; }
-  .window-chip, dialog.zoom, dialog.zoom::backdrop { animation: none; }
+  .window-chip { animation: none; }
   .nav__indicator.is-ready,
   .nav__indicator.is-ready[data-dir="left"] { transition: none; }
 }
