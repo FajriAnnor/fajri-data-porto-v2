@@ -35,6 +35,8 @@ Only build what is listed in the brief's sections 4–7 (visual design, page sec
 - macOS hover glyphs (×, −, +) on pointer devices only; `:focus-visible` ring; `prefers-reduced-motion`: no animation.
 - Only new text allowed: the aria-labels (`Close/Minimize/Zoom <window title>`) and the chip label (`Reopen <window title>`). No copy, number, link or date changes. Address pills stay decorative. No other file or feature is touched (hero slice, loader, counter, contact form, nav, server).
 
+**Allowed change (loader timing, branch `loader-timing` only):** the intro loader rules are now: about 2.7 s, skippable (click, tap or any key), shows on every page load (no sessionStorage / once-per-session logic), off for reduced motion and without JS, never blocks content or the counter request. The word "Fajri" appears as random glyphs that lock into the right letter one by one, left to right (locked letters solid, unresolved ones lighter), then the existing line fades in and the overlay fades out. All timings live in one config object at the top of the loader code in `main.js`. No copy changes (the line text is unchanged, without the number if the API does not answer in time). Nothing else is touched.
+
 Everything else stays untouched: nav, Expertise, Contact and form, loader, counter, API, server, all project/experience texts and numbers, links, dates, resume link, SEO/meta.
 
 If something extra would help, list it as a suggestion at the end of the report. Do not implement it.
@@ -61,7 +63,7 @@ Tech stack is fixed: no framework, no build step, no CSS framework, no npm UI li
 - [ ] No "Why I do this", no certifications, no language toggle, no extra pages.
 - [ ] Every number on the page matches the brief exactly; "average" and "up to" kept; no invented figures or dates; no time-saved claims.
 - [ ] Project cards show "Synthetic demo data"; experience cards do not.
-- [ ] Loader ≤ 1.6 s, skippable, once per session, off for reduced motion, never blocks content, graceful when the API is down.
+- [ ] Loader about 2.7 s, skippable, shows on every page load, off for reduced motion, never blocks content, graceful when the API is down.
 - [ ] Visitor counter counts unique browsers only, ignores bots, never throws, stores no personal data.
 - [ ] Light theme, single blue accent, floating pill nav, two-column section layout, cut-corner primary button, grayscale portrait slot.
 - [ ] Works at 375 / 768 / 1440 with no horizontal scroll; no console errors.

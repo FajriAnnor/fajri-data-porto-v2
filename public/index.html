@@ -19,16 +19,16 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap">
   <link rel="stylesheet" href="/css/style.css">
 
-  <!-- Runs before first paint: flags JS support and decides whether the intro loader shows
-       (once per browser session, never with reduced motion). Storage access can throw, hence try/catch. -->
+  <!-- Runs before first paint: flags JS support and shows the intro loader on every page load
+       (never with reduced motion), so the page does not flash before the overlay appears. -->
   <script>
     (function () {
       var root = document.documentElement;
       root.classList.add('js');
       try {
         var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        if (!reduce && !sessionStorage.getItem('loaderSeen')) root.classList.add('loader-on');
-      } catch (e) { /* storage blocked: no loader */ }
+        if (!reduce) root.classList.add('loader-on');
+      } catch (e) { /* matchMedia unavailable: no loader */ }
     })();
   </script>
   <script src="/js/content.js" defer></script>
@@ -47,7 +47,7 @@
 
   <!-- Intro loader. Hidden unless <html class="loader-on">; main.js removes it from the DOM. -->
   <div class="loader" id="loader" aria-hidden="true">
-    <div class="loader__word"><span id="loaderWord">Fajri</span><span class="loader__cursor"></span></div>
+    <div class="loader__word"><span id="loaderWord"></span><span class="loader__cursor"></span></div>
     <p class="loader__line" id="loaderLine"></p>
   </div>
 

@@ -53,7 +53,7 @@ The server logs one line on start and errors only. It never logs IPs, cookies or
 - A new browser increments the counter once and receives cookies `visitor_id` (random UUID) and `visitor_no` (its number), both HttpOnly, `Path=/`, `SameSite=Lax`, 365 days. A returning browser gets its own number back with no increment. Reloads never increment.
 - Bots (User-Agent contains bot, crawl, spider, slurp, preview, headless, lighthouse, etc., or no User-Agent) never increment and get no cookies; they receive the current total.
 - Non-GET requests to `/api/visit` return `405`. Responses are `Cache-Control: no-store`.
-- Any error responds `200 {"count": null}`, and the loader then shows its line without a number. The front-end never aborts the request: the loader stops waiting after 800 ms while the request finishes in the background.
+- Any error responds `200 {"count": null}`, and the loader then shows its line without a number. The front-end never aborts the request: the loader stops waiting after `countWaitMax` (1500 ms, in the loader config at the top of the loader code in `public/js/main.js`) while the request finishes in the background.
 - Increments go through an in-process queue and writes are atomic (temp file, fsync, rename), so concurrent requests cannot lose or duplicate a number.
 - If `visitors.json` is corrupt it is **not** reset: it is copied to `visitors.json.corrupt-<timestamp>`, an error is logged, and the API returns `{"count": null}` until you fix the file.
 - Cookies whose number is higher than the current count are ignored (treated as a new visitor).

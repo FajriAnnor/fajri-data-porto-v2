@@ -1077,7 +1077,7 @@ dialog.zoom .window__bar { position: sticky; top: 0; z-index: 2; }
   padding: 0 var(--pad);
   background: var(--bg);
   text-align: center;
-  transition: opacity .3s ease;
+  transition: opacity .35s ease;   /* duration is set from the config in main.js */
 }
 .loader.is-leaving { opacity: 0; }
 
@@ -1089,6 +1089,22 @@ dialog.zoom .window__bar { position: sticky; top: 0; z-index: 2; }
   line-height: 1;
   letter-spacing: -.04em;
   text-align: left;
+}
+/* One slot per letter. The invisible ghost (the final letter) sets the width, the glyph on top churns. */
+.loader__ch {
+  position: relative;
+  display: inline-block;
+  opacity: .4;                       /* still scrambling: lighter */
+  transition: opacity .12s ease;
+}
+.loader__ch.is-locked { opacity: 1; }   /* locked: solid */
+.loader__ghost { visibility: hidden; }
+.loader__glyph {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  white-space: nowrap;
 }
 .loader__cursor {
   width: .07em; height: .8em;
@@ -1103,7 +1119,7 @@ dialog.zoom .window__bar { position: sticky; top: 0; z-index: 2; }
   font-size: 1rem;
   color: var(--muted);
   opacity: 0;
-  transition: opacity .25s ease;
+  transition: opacity .4s ease;
 }
 .loader__line.is-shown { opacity: 1; }
 

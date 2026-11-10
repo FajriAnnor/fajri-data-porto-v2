@@ -17,7 +17,7 @@
       .catch(function () { return null; });
   }
 
-  // For the loader: the number, or null once 800 ms have passed without an answer.
+  // For the loader: the number, or null once LOADER.countWaitMax ms have passed without an answer.
   function withinMs(promise, ms) {
     return Promise.race([
       promise,
@@ -337,34 +337,29 @@
     items.forEach(function (el) { observer.observe(el); });
   }
 
-  /* ---------- Intro loader (≈1.5 s, skippable, once per session) ---------- */
+  /* ---------- Intro loader (about 2.7 s, skippable, shows on every page load) ----------
+     "Fajri" starts as random glyphs and each letter locks into the right one, left to right.
+     Then the existing line fades in and the whole overlay fades out. */
 
-  var GLYPHS = '!<>-_\\/[]{}=+*^?#%&0123456789';
-  var SCRAMBLE_MS = 850;   // time until the word is fully resolved
-  var LEAVE_AT_MS = 1200;  // when the fade-out starts
-  var FADE_MS = 300;       // fade-out length → total ≈ 1.5 s
+  // ALL loader timings live here (milliseconds, counted from the moment the loader starts).
+  var LOADER = {
+    word: 'Fajri',
+    startDelay: 150,      // nothing is shown until then
+    scrambleEnd: 1750,    // the last letter is locked by then
+    lockStagger: 280,     // gap between two letters locking; the first one locks at
+                          //   scrambleEnd - (letters - 1) * lockStagger  (= 630 with the defaults)
+    lockJitter: 40,       // random extra ms before a letter locks (the last letter is never later than scrambleEnd)
+    lineFadeIn: 1000,     // earliest moment the "A little hello ..." line fades in
+    holdUntil: 2350,      // the overlay starts fading out here
+    fadeOut: 350,         // overlay fade-out; total = holdUntil + fadeOut (about 2.7 s)
+    skipFade: 150,        // fade-out length when the visitor skips (click, tap or any key)
+    glyphInterval: 45,    // how often the still-scrambling letters change glyph
+    countWaitMax: 1500,   // how long to wait for /api/visit before the line is shown without the number
+    glyphs: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789#%&*+=?<>/'
+  };
 
-  // Scrambles random glyphs and resolves left to right into `finalText`.
-  function scramble(el, finalText, duration, onFrame) {
-    var chars = Array.from(finalText);
-    var start = performance.now();
-    var lastShuffle = 0;
-    var current = chars.map(function () { return ''; });
-
-    function frame(now) {
-      var elapsed = now - start;
-      if (now - lastShuffle > 45 || elapsed >= duration) {
-        lastShuffle = now;
-        current = chars.map(function (ch, i) {
-          return elapsed >= duration * (i + 1) / chars.length
-            ? ch
-            : GLYPHS.charAt(Math.floor(Math.random() * GLYPHS.length));
-        });
-        el.textContent = current.join('');
-      }
-      if (elapsed < duration) onFrame(requestAnimationFrame(frame));
-    }
-    onFrame(requestAnimationFrame(frame));
+  function loaderMark(name) {
+    try { performance.mark('loader:' + name); } catch (e) { /* marks are only for measuring */ }
   }
 
   function initLoader(visitorNumber) {
@@ -372,50 +367,140 @@
     if (!overlay) return;
     if (!root.classList.contains('loader-on')) { overlay.remove(); return; }
 
-    var word = document.getElementById('loaderWord');
+    var wordBox = document.getElementById('loaderWord');
     var line = document.getElementById('loaderLine');
+    var letters = Array.from(LOADER.word);
+    var last = letters.length - 1;
     var timers = [];
     var rafId = 0;
     var done = false;
+    var leaving = false;
+    var t0 = performance.now();
+    loaderMark('start');
 
-    try { sessionStorage.setItem('loaderSeen', '1'); } catch (e) { /* storage blocked */ }
+    // One fixed-width slot per letter (an invisible copy of the final letter sizes it),
+    // so the word never changes width while the glyphs churn.
+    wordBox.textContent = '';
+    var slots = letters.map(function (ch) {
+      var slot = document.createElement('span');
+      var ghost = document.createElement('span');
+      var glyph = document.createElement('span');
+      slot.className = 'loader__ch';
+      ghost.className = 'loader__ghost';
+      ghost.textContent = ch;
+      glyph.className = 'loader__glyph';
+      slot.appendChild(ghost);
+      slot.appendChild(glyph);
+      wordBox.appendChild(slot);
+      return { el: slot, glyph: glyph, locked: false };
+    });
+
+    function later(fn, atMs) {   // run fn atMs after the loader started
+      timers.push(setTimeout(fn, Math.max(0, atMs - (performance.now() - t0))));
+    }
+
+    // Each slot only churns through glyphs that are not much wider than its own letter, so a
+    // narrow "i" never gets a wide "W" painted over its neighbours. Measured in the loader's font.
+    var allGlyphs = Array.from(LOADER.glyphs);
+    function buildPools() {
+      var probe = document.createElement('span');
+      probe.setAttribute('aria-hidden', 'true');
+      probe.style.cssText = 'position:absolute;left:0;top:0;visibility:hidden;white-space:nowrap';
+      var nodes = allGlyphs.map(function (g) {
+        var n = document.createElement('span');
+        n.style.display = 'inline-block';
+        n.textContent = g;
+        probe.appendChild(n);
+        return n;
+      });
+      wordBox.appendChild(probe);
+      var widths = nodes.map(function (n) { return n.getBoundingClientRect().width; });
+      var byWidth = allGlyphs.map(function (g, k) { return { g: g, w: widths[k] }; }).sort(function (a, b) { return a.w - b.w; });
+      slots.forEach(function (s) {
+        var max = s.el.getBoundingClientRect().width * 1.3;
+        var pool = byWidth.filter(function (x) { return x.w <= max; });
+        s.pool = (pool.length >= 6 ? pool : byWidth.slice(0, 6)).map(function (x) { return x.g; });
+      });
+      wordBox.removeChild(probe);
+    }
+
+    var lastShuffle = 0;
+    function churn(now) {
+      rafId = requestAnimationFrame(churn);
+      if (now - lastShuffle < LOADER.glyphInterval) return;
+      lastShuffle = now;
+      slots.forEach(function (s) {
+        if (s.locked) return;
+        var next;
+        do { next = s.pool[Math.floor(Math.random() * s.pool.length)]; } while (next === s.glyph.textContent && s.pool.length > 1);
+        s.glyph.textContent = next;
+      });
+    }
+
+    function lock(i) {
+      var s = slots[i];
+      s.locked = true;
+      s.glyph.textContent = letters[i];
+      s.el.classList.add('is-locked');
+      loaderMark('lock' + i);
+      if (i === last) cancelAnimationFrame(rafId);
+    }
 
     function finish() {
       if (done) return;
       done = true;
       timers.forEach(clearTimeout);
       cancelAnimationFrame(rafId);
-      document.removeEventListener('pointerdown', finish);
-      document.removeEventListener('keydown', finish);
+      document.removeEventListener('pointerdown', skip);
+      document.removeEventListener('keydown', skip);
       overlay.remove();
       root.classList.remove('loader-on');
+      loaderMark('end');
     }
 
-    function leave() {
+    function fade(ms) {
+      leaving = true;
+      loaderMark('fade-start');
+      overlay.style.transitionDuration = ms + 'ms';
       overlay.classList.add('is-leaving');
-      timers.push(setTimeout(finish, FADE_MS));
+      timers.push(setTimeout(finish, ms));
     }
 
-    // Any click, tap or key skips the intro immediately.
-    document.addEventListener('pointerdown', finish);
-    document.addEventListener('keydown', finish);
+    // Any click, tap or key skips the intro: quick fade, then removed. A second press during the fade removes it at once.
+    function skip() {
+      if (done) return;
+      if (leaving) { finish(); return; }
+      timers.forEach(clearTimeout);
+      timers = [];
+      cancelAnimationFrame(rafId);
+      fade(LOADER.skipFade);
+    }
+    document.addEventListener('pointerdown', skip);
+    document.addEventListener('keydown', skip);
 
-    // Keep the box width stable while glyphs change.
-    word.parentNode.style.minWidth = word.parentNode.offsetWidth + 'px';
+    // Glyph churn starts after startDelay; the letters lock left to right, the last one at scrambleEnd.
+    later(function () { buildPools(); rafId = requestAnimationFrame(churn); }, LOADER.startDelay);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { if (!done && slots[0].pool) buildPools(); });
+    var firstLock = LOADER.scrambleEnd - last * LOADER.lockStagger;
+    letters.forEach(function (ch, i) {
+      var jitter = i === last ? 0 : Math.random() * LOADER.lockJitter;
+      later(function () { lock(i); }, firstLock + i * LOADER.lockStagger + jitter);
+    });
 
-    scramble(word, 'Fajri', SCRAMBLE_MS, function (id) { rafId = id; });
-
-    // visitorNumber settles within 800 ms (see withinMs), before the scramble ends.
-    timers.push(setTimeout(function () {
+    // The line appears at lineFadeIn, or as soon as the visitor number is known (at most countWaitMax),
+    // whichever is later. Its text is final when it fades in, so nothing jumps afterwards.
+    later(function () {
       visitorNumber.then(function (n) {
-        if (done) return;
+        if (done || leaving) return;
         line.textContent = n === null
           ? 'A little hello. Glad you stopped by.'
           : 'A little hello to visitor #' + n + '. Glad you stopped by.';
         line.classList.add('is-shown');
+        loaderMark('line');
       });
-    }, SCRAMBLE_MS));
-    timers.push(setTimeout(leave, LEAVE_AT_MS));
+    }, LOADER.lineFadeIn);
+
+    later(function () { fade(LOADER.fadeOut); }, LOADER.holdUntil);
   }
 
   /* ---------- About: "Currently learning" cards from content.js ---------- */
@@ -576,7 +661,7 @@
 
   /* ---------- Init ---------- */
 
-  var visitor = withinMs(fetchVisitorNumber(), 800);   // the request itself counts the visit, even if the loader is skipped
+  var visitor = withinMs(fetchVisitorNumber(), LOADER.countWaitMax);   // the request itself counts the visit, even if the loader is skipped
   hydrate();
   renderLearning();
   initNav();
