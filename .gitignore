@@ -10,3 +10,4 @@ node_modules
 data/*.json
 data/*.corrupt-*
 data/*.tmp
+data/*.jsonl

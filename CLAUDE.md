@@ -16,8 +16,11 @@ Only build what is listed in the brief's sections 4–7 (visual design, page sec
 - Certifications section (bootcamp starts 18 Nov 2026; no certificates yet)
 - Real photo (use the grayscale SVG placeholder; photo drops in later as `/assets/portrait.jpg`)
 - Language toggle / i18n (English only for now, but keep copy/data in one data file so translation is easy later)
-- Blog, dark mode, gallery, extra pages, testimonials, skill-percentage bars, contact form backend, analytics scripts, cookie banners, any extra animation not listed in the brief
+- Blog, dark mode, custom cursor, gallery, extra pages, testimonials, skill-percentage bars, project screenshots/thumbnails, tabs/carousels/accordions, analytics scripts, cookie banners, any extra animation not listed in the brief
+- Email or chat notification for contact messages (only an empty no-op `notify()` hook is allowed)
 - Extra projects or extra experience entries beyond those listed in the brief
+
+**Allowed addition (UI polish brief):** the Contact section may contain a contact form (fields: name, email, message) with its small backend `POST /api/contact` (`lib/contact.js`, messages appended to `data/messages.jsonl`, `npm run messages` to read them). Nothing else new is allowed. Visual polish (type scale, liquid-glass nav, Mac-style experience windows, compact project cards) must not change any copy, number, link or date.
 
 If something extra would help, list it as a suggestion at the end of the report. Do not implement it.
 
@@ -39,7 +42,7 @@ Tech stack is fixed: no framework, no build step, no CSS framework, no npm UI li
 
 ## 9. ACCEPTANCE CHECKLIST (all must be true before saying "done")
 
-- [ ] Sections present in order: Hero, About, Core expertise, Projects (3), Experience (2), Contact, Footer — and nothing else.
+- [ ] Sections present in order: Hero, About, Core expertise, Projects (3), Experience (2), Contact (with the contact form), Footer — and nothing else.
 - [ ] No "Why I do this", no certifications, no language toggle, no extra pages.
 - [ ] Every number on the page matches the brief exactly; "average" and "up to" kept; no invented figures or dates; no time-saved claims.
 - [ ] Project cards show "Synthetic demo data"; experience cards do not.

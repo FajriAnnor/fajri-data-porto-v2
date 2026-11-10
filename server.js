@@ -7,6 +7,8 @@
  *   HOST          default 127.0.0.1
  *   DATA_DIR      default ./data (relative paths are resolved from this folder)
  *   COOKIE_SECURE auto (default) | true | false
+ *   TRUST_PROXY   false (default) | true: use the first X-Forwarded-For value as client IP (contact rate limit)
+ *   ALLOWED_ORIGINS optional comma list of extra origins allowed to POST /api/contact
  * Logs one line on start and errors only. Never logs IPs, cookies or user agents.
  */
 
@@ -16,31 +18,10 @@ const path = require('path');
 const { pipeline } = require('stream');
 const { FileStore } = require('./lib/store');
 const { createVisitHandler } = require('./lib/visit');
+const { createContactHandler } = require('./lib/contact');
+const { loadEnvFile } = require('./lib/env');
 
 /* ---------- Config ---------- */
-
-// Tiny .env parser: KEY=VALUE lines, # comments, optional quotes. Never overrides
-// variables that are already set in the environment.
-function loadEnvFile(file) {
-  let text;
-  try { text = fs.readFileSync(file, 'utf8'); } catch (err) { return; }
-  for (const raw of text.split(/\r?\n/)) {
-    const line = raw.trim();
-    if (!line || line.startsWith('#')) continue;
-    const eq = line.indexOf('=');
-    if (eq < 1) continue;
-    const key = line.slice(0, eq).trim().replace(/^export\s+/, '');
-    if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(key)) continue;
-    let value = line.slice(eq + 1).trim();
-    const quote = value[0];
-    if ((quote === '"' || quote === "'") && value.length >= 2 && value.endsWith(quote)) {
-      value = value.slice(1, -1);
-    } else {
-      value = value.replace(/\s+#.*$/, '');
-    }
-    if (!(key in process.env)) process.env[key] = value;
-  }
-}
 
 loadEnvFile(path.join(__dirname, '.env'));
 
@@ -55,6 +36,9 @@ const HOST = process.env.HOST || '127.0.0.1';
 const DATA_DIR = path.resolve(__dirname, process.env.DATA_DIR || './data');
 const COOKIE_SECURE = (process.env.COOKIE_SECURE || 'auto').toLowerCase();
 if (!['auto', 'true', 'false'].includes(COOKIE_SECURE)) fail('COOKIE_SECURE must be auto, true or false');
+
+const TRUST_PROXY = (process.env.TRUST_PROXY || 'false').toLowerCase() === 'true';
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || '').split(',').map((o) => o.trim()).filter(Boolean);
 
 const PUBLIC_DIR = path.join(__dirname, 'public');
 
@@ -169,6 +153,7 @@ async function main() {
   }
 
   const handleVisit = createVisitHandler({ store, cookieSecure: COOKIE_SECURE });
+  const handleContact = createContactHandler({ dataDir: DATA_DIR, trustProxy: TRUST_PROXY, allowedOrigins: ALLOWED_ORIGINS });
   const serveStatic = createStaticHandler(realPublicDir);
 
   const server = http.createServer(async (req, res) => {
@@ -178,6 +163,7 @@ async function main() {
       if (!urlPath.startsWith('/')) return sendText(res, 400, 'Bad Request');
 
       if (urlPath === '/api/visit') return await handleVisit(req, res);
+      if (urlPath === '/api/contact') return await handleContact(req, res);
       if (urlPath.startsWith('/api/')) return sendText(res, 404, 'Not Found');
       return await serveStatic(req, res, urlPath);
     } catch (err) {
@@ -207,7 +193,7 @@ async function main() {
     const force = setTimeout(() => process.exit(1), 5000);
     force.unref();
     server.close(() => {
-      store.flush().catch(() => {}).then(() => process.exit(0));
+      Promise.all([store.flush(), handleContact.flush()]).catch(() => {}).then(() => process.exit(0));
     });
     server.closeIdleConnections();
   }

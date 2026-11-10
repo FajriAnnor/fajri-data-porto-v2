@@ -1,7 +1,7 @@
 # Fajri — Portfolio
 
 Personal portfolio for Fajri, Data Analyst. Plain HTML + CSS + vanilla JS, no build step.
-A small Node server with **zero npm dependencies** serves the site and the unique-visitor counter (`GET /api/visit`).
+A small Node server with **zero npm dependencies** serves the site, the unique-visitor counter (`GET /api/visit`) and the contact form backend (`POST /api/contact`).
 
 ```
 public/             the website (document root)
@@ -14,7 +14,10 @@ public/             the website (document root)
 server.js           static file server + routing, config, graceful shutdown
 lib/visit.js        GET /api/visit logic (cookies, bots, unique counting)
 lib/store.js        counter storage (JSON file); swap this to use Redis/SQLite later
-data/               runtime data (visitors.json is git-ignored; .gitkeep keeps the folder)
+lib/contact.js      POST /api/contact (contact form backend, messages.jsonl, anti-spam)
+lib/env.js          tiny .env loader shared by server.js and the scripts
+scripts/read-messages.js   prints the stored contact messages (npm run messages)
+data/               runtime data (visitors.json, messages.jsonl are git-ignored; .gitkeep keeps the folder)
 ```
 
 Server code lives outside `public/`, so it can never be served as a static file.
@@ -39,6 +42,8 @@ Environment variables, optionally set in a `.env` file in this folder (see `.env
 | `HOST` | `127.0.0.1` | Interface to bind. Keep it on localhost when behind Nginx |
 | `DATA_DIR` | `./data` | Where `visitors.json` lives (relative paths resolve from this folder) |
 | `COOKIE_SECURE` | `auto` | `auto`: Secure cookies only when the request is HTTPS or `X-Forwarded-Proto: https`. `true` / `false` force it |
+| `TRUST_PROXY` | `false` | `true`: use the first `X-Forwarded-For` value as the client IP for the contact form rate limit. Set it to `true` **only** behind your own reverse proxy that overwrites that header (see the Nginx example). Otherwise anyone could spoof it |
+| `ALLOWED_ORIGINS` | empty | Optional comma-separated extra origins allowed to POST `/api/contact`, e.g. `https://example.com`. Posts from the site's own host are always allowed |
 
 The server logs one line on start and errors only. It never logs IPs, cookies or user agents.
 
@@ -64,6 +69,35 @@ curl -i -c jar.txt -A "Mozilla/5.0" http://localhost:3000/api/visit   # new visi
 curl -i -b jar.txt -A "Mozilla/5.0" http://localhost:3000/api/visit   # returning: same number
 curl -i -A "Googlebot" http://localhost:3000/api/visit                # bot: total, no cookies
 ```
+
+## Contact form
+
+The Contact section has a form (name, email, message) backed by `POST /api/contact` (`lib/contact.js`).
+
+**There is NO email or chat notification yet.** Messages are only written to a file. Read them with `npm run messages` (or open the file). `notify(message)` in `lib/contact.js` is an empty hook where a notification can be added later; errors inside it can never fail a request.
+
+How it works:
+
+- **With JavaScript** the form is sent as JSON with `fetch`, and the page shows the result in place (idle, sending, success, error). Success is shown only when the server answers 2xx with `{"ok":true}`.
+- **Without JavaScript** the plain `<form method="post" action="/api/contact">` works. The server redirects back to `/#sent` (success) or `/#send-error` (failure) and CSS `:target` shows the matching note. Send `Accept: application/json` to get JSON instead of redirects (handy for `curl`).
+- **Accepts** `application/json` and `application/x-www-form-urlencoded`, body up to 10 KB (larger: `413`). Other content types: `415`. Only `POST` (`405` otherwise). Responses are `Cache-Control: no-store`.
+- **Validation** (client and server): name 1–100 characters, email valid format up to 200, message 10–2000 characters. The server trims, strips control characters and answers `400 {"ok":false,"errors":{...}}`.
+- **Anti-spam:**
+  - hidden honeypot field `website`: if filled, the server answers success but stores nothing;
+  - field `t` = milliseconds since page load (set by the JS): below 3000 the server answers success but stores nothing. Missing `t` (no-JS form) is accepted;
+  - at most 3 stored messages per hour per client (`429` beyond that). Clients are identified by a salted hash of the IP that exists only in memory (new salt on every start); raw IPs are never stored, logged or written to disk;
+  - an `Origin` header, when present, must match the request `Host` (or `ALLOWED_ORIGINS`), else `403`.
+- **Client IP:** the socket address by default. With `TRUST_PROXY=true` the first `X-Forwarded-For` value is used instead.
+- **Storage:** one JSON line per message appended to `DATA_DIR/messages.jsonl` as `{"id","receivedAt","name","email","message"}`. Appends go through an in-process queue (never interleave or get lost) and are fsynced. The file is created with mode 0600 on Linux and is git-ignored. If a write fails the API answers `500 {"ok":false}` and the page shows the error state.
+- **Logging:** only a generic error line when something fails. Message contents and emails are never logged.
+
+### Read the messages
+
+```bash
+npm run messages
+```
+
+Prints every stored message (oldest first, newest last) with date, sender and text. It reads `DATA_DIR` from the environment or `.env`, so run it on the machine (or VPS) where the server stores its data. The file contains personal data (names, emails, messages): keep it private and include it in your backups.
 
 ## Static files
 
@@ -102,6 +136,8 @@ Environment=PORT=3000
 Environment=HOST=127.0.0.1
 Environment=DATA_DIR=/opt/portfolio/data
 Environment=COOKIE_SECURE=auto
+# Nginx below overwrites X-Forwarded-For, so it is safe to trust it for the contact rate limit
+Environment=TRUST_PROXY=true
 Restart=on-failure
 NoNewPrivileges=true
 ProtectSystem=strict
@@ -143,6 +179,8 @@ server {
     location /api/ {
         proxy_pass http://127.0.0.1:3000;
         proxy_set_header X-Forwarded-Proto $scheme;
+        # overwrite (not append) so a client cannot spoof its address; the server trusts this with TRUST_PROXY=true
+        proxy_set_header X-Forwarded-For $remote_addr;
         proxy_set_header Host $host;
     }
 
@@ -162,5 +200,7 @@ sudo nginx -t && sudo systemctl reload nginx
 sudo apt install certbot python3-certbot-nginx
 sudo certbot --nginx -d example.com -d www.example.com   # enables HTTPS
 ```
+
+Without `TRUST_PROXY=true` every visitor reaches Node as `127.0.0.1`, so the contact form's 3-per-hour limit would be shared by everybody. With it set, Nginx must overwrite `X-Forwarded-For` as shown (and `Host` must be forwarded for the Origin check).
 
 Once HTTPS is on, `COOKIE_SECURE=auto` sets the Secure flag because Nginx sends `X-Forwarded-Proto: https`.
