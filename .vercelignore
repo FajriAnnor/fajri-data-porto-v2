@@ -1,0 +1,9 @@
+# Files that should not be uploaded/served with the site.
+# Do NOT list resume/, api/, assets/, css/ or js/ here.
+CLAUDE.md
+README.md
+.env
+.env.local
+.env.example
+.gitignore
+DEPLOY.md

@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fajri — Data Analyst</title>
+  <meta name="description" content="Fajri is a Data Analyst who turns operational data into dashboards and reports people can act on.">
+  <meta name="theme-color" content="#fafafa">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Fajri — Data Analyst">
+  <meta property="og:description" content="Fajri is a Data Analyst who turns operational data into dashboards and reports people can act on.">
+  <meta name="twitter:card" content="summary">
+
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap">
+  <link rel="stylesheet" href="/css/style.css">
+
+  <!-- Runs before first paint: flags JS support and decides whether the intro loader shows
+       (once per browser session, never with reduced motion). Storage access can throw, hence try/catch. -->
+  <script>
+    (function () {
+      var root = document.documentElement;
+      root.classList.add('js');
+      try {
+        var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (!reduce && !sessionStorage.getItem('loaderSeen')) root.classList.add('loader-on');
+      } catch (e) { /* storage blocked: no loader */ }
+    })();
+  </script>
+  <script src="/js/content.js" defer></script>
+  <script src="/js/main.js" defer></script>
+</head>
+<body>
+
+  <!-- Intro loader. Hidden unless <html class="loader-on">; main.js removes it from the DOM. -->
+  <div class="loader" id="loader" aria-hidden="true">
+    <div class="loader__word"><span id="loaderWord">Fajri</span><span class="loader__cursor"></span></div>
+    <p class="loader__line" id="loaderLine"></p>
+  </div>
+
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="nav-wrap">
+    <nav class="nav" id="nav" aria-label="Primary">
+      <a class="nav__brand" href="#home">Fajri</a>
+      <button class="nav__toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="navList">Menu</button>
+      <ul class="nav__list" id="navList">
+        <li><a class="nav__link" href="#home">Home</a></li>
+        <li><a class="nav__link" href="#about">About</a></li>
+        <li><a class="nav__link" href="#expertise">Expertise</a></li>
+        <li><a class="nav__link" href="#projects">Projects</a></li>
+        <li><a class="nav__link" href="#experience">Experience</a></li>
+        <li><a class="nav__link" href="#contact">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main id="main" tabindex="-1">
+
+    <!-- HERO -->
+    <section class="hero" id="home">
+      <div class="hero__inner">
+        <div class="hero__text">
+          <p class="hero__label">Data Analyst</p>
+          <h1 class="hero__name">Fajri</h1>
+          <p class="hero__sentence">I turn operational data into dashboards and reports people can act on.</p>
+          <div class="hero__actions">
+            <a class="btn" href="https://www.linkedin.com/in/fajri-3367772bb/" data-link="linkedin" target="_blank" rel="noopener noreferrer">LinkedIn<span class="sr-only"> (opens in new tab)</span></a>
+            <a class="btn" href="https://github.com/FajriAnnor" data-link="github" target="_blank" rel="noopener noreferrer">GitHub<span class="sr-only"> (opens in new tab)</span></a>
+            <a class="btn btn--primary" href="#projects">View my work</a>
+          </div>
+          <p class="hero__resume"><a class="text-link" href="/resume/Fajri_Resume.pdf" data-link="resume" download>Download resume</a></p>
+        </div>
+        <div class="hero__portrait">
+          <!-- Drop a real photo at /assets/portrait.jpg to replace the SVG placeholder. -->
+          <img class="portrait" src="/assets/portrait.jpg" width="400" height="500"
+               alt="Portrait placeholder for Fajri"
+               onerror="this.onerror=null;this.src='/assets/portrait.svg'">
+        </div>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section class="section section--band" id="about">
+      <div class="section__inner reveal">
+        <h2 class="label">About me</h2>
+        <div class="section__body">
+          <p class="statement">I care about data that people can trust and actually use.</p>
+          <p class="body-text">I work with operational data day to day — vehicle registration (STNK/BPKB) processing, rental-to-own (RTO) request workflows, and sales reporting across branches. I build the systems and dashboards that make that data easy to find, check, and act on.</p>
+          <p class="body-text">Before that I managed a sales database and reported monthly sales trends to the owner. I clean data with SQL and Python and present it in Tableau and Excel.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CORE EXPERTISE -->
+    <section class="section" id="expertise">
+      <div class="section__inner reveal">
+        <h2 class="label">Core expertise</h2>
+        <div class="section__body">
+          <ul class="expertise">
+            <li>Data Analysis</li>
+            <li>Data Cleaning</li>
+            <li>Business Intelligence</li>
+            <li>SQL &amp; Databases</li>
+            <li>Reporting Automation</li>
+            <li>Operational Reporting</li>
+          </ul>
+          <p class="tools"><span class="tools__label">Tools</span> Microsoft Excel · Tableau · Power BI · Google Sheets · PostgreSQL · SQL · Python · JavaScript · Git / GitHub</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROJECTS (synthetic demo data) -->
+    <section class="section section--band" id="projects">
+      <div class="section__inner reveal">
+        <h2 class="label">Project</h2>
+        <div class="section__body">
+          <p class="statement">Three projects built to show how I work. All data is synthetic.</p>
+
+          <div class="cards">
+
+            <article class="card" aria-labelledby="p1-title">
+              <div class="card__head">
+                <div>
+                  <h3 class="card__title" id="p1-title">WEDISON Operations Analytics</h3>
+                  <p class="card__category">Business Intelligence</p>
+                </div>
+                <span class="tag">Synthetic demo data</span>
+              </div>
+              <div class="blocks">
+                <div class="block"><h4 class="block__label">Problem</h4><p>Sales performance, customer sources, product mix and branch results lived in separate reports, so simple questions took too long to answer.</p></div>
+                <div class="block"><h4 class="block__label">Solution</h4><p>One interactive Tableau executive dashboard with filters for branch, vehicle model, customer source and purchase scheme. Data prepared with PostgreSQL and Excel.</p></div>
+                <div class="block"><h4 class="block__label">Result</h4><p>In the demo dataset (September 2026), the dashboard shows 135 units sold and Rp 56.409.000 in down payments collected, and makes two things visible at once: the top-selling model by volume (VICTORY-REG, 30 units) differs from the model contributing the most down payment (VICTORY-EXT, Rp 12.575.000), and referral is the strongest customer source at 30,1% of down payment.</p></div>
+                <div class="block"><h4 class="block__label">Tech</h4><p>Tableau, PostgreSQL, Excel.</p></div>
+              </div>
+              <ul class="stats">
+                <li class="stat"><strong class="stat__value" data-stat="wedisonAnalytics.units">135</strong><span class="stat__label">units sold</span></li>
+                <li class="stat"><strong class="stat__value" data-stat="wedisonAnalytics.downPayment">Rp 56,4 jt</strong><span class="stat__label">down payment collected</span></li>
+                <li class="stat"><strong class="stat__value" data-stat="wedisonAnalytics.branches">4</strong><span class="stat__label">branches</span></li>
+              </ul>
+              <div class="card__links">
+                <a class="btn btn--primary" href="https://public.tableau.com/app/profile/fajri.annor/viz/WEDISON_Synthetic_Portfolio/WEDISONEXECUTIVEDASHBOARD" data-link="tableau" target="_blank" rel="noopener noreferrer">Open live dashboard<span class="sr-only"> (opens in new tab)</span></a>
+              </div>
+            </article>
+
+            <article class="card" aria-labelledby="p2-title">
+              <div class="card__head">
+                <div>
+                  <h3 class="card__title" id="p2-title">Automated Sales Reporting</h3>
+                  <p class="card__category">Reporting Automation</p>
+                </div>
+                <span class="tag">Synthetic demo data</span>
+              </div>
+              <div class="blocks">
+                <div class="block"><h4 class="block__label">Problem</h4><p>Sales files arrive with duplicate orders, missing or invalid dates and prices, and totals that do not add up. Fixing this by hand is repetitive, and one missed row can quietly distort every total.</p></div>
+                <div class="block"><h4 class="block__label">Solution</h4><p>A Node.js pipeline that validates, cleans and de-duplicates raw sales CSV data, then exports a seven-sheet Excel report. One command (npm run demo) runs everything, and automated tests are included.</p></div>
+                <div class="block"><h4 class="block__label">Result</h4><p>Of 255 raw rows, 228 were accepted (89,41%) and 27 were held back for review, including 15 duplicate or conflicting IDs. Rejected rows stay visible instead of silently distorting the metrics.</p></div>
+                <div class="block"><h4 class="block__label">Tech</h4><p>JavaScript, Node.js, ExcelJS, Excel.</p></div>
+              </div>
+              <ul class="stats">
+                <li class="stat"><strong class="stat__value" data-stat="salesReporting.rawRows">255</strong><span class="stat__label">raw rows</span></li>
+                <li class="stat"><strong class="stat__value" data-stat="salesReporting.validationRate">89,41%</strong><span class="stat__label">validation rate</span></li>
+                <li class="stat"><strong class="stat__value" data-stat="salesReporting.sheets">7</strong><span class="stat__label">Excel sheets</span></li>
+              </ul>
+              <div class="card__links">
+                <a class="btn btn--primary" href="https://github.com/FajriAnnor/automated-sales-reporting" data-link="salesReportingRepo" target="_blank" rel="noopener noreferrer">View on GitHub<span class="sr-only"> (opens in new tab)</span></a>
+              </div>
+            </article>
+
+            <article class="card" aria-labelledby="p3-title">
+              <div class="card__head">
+                <div>
+                  <h3 class="card__title" id="p3-title">RTO Request Monitoring</h3>
+                  <p class="card__category">Operations Analytics</p>
+                </div>
+                <span class="tag">Synthetic demo data</span>
+              </div>
+              <div class="blocks">
+                <div class="block"><h4 class="block__label">Problem</h4><p>Rental-to-own requests are hard to follow when approval status, document completeness and backlog sit in manual files, so it is unclear which requests need follow-up.</p></div>
+                <div class="block"><h4 class="block__label">Solution</h4><p>An interactive monitoring dashboard covering request volume, approval stage, document status, backlog and aging in one view.</p></div>
+                <div class="block"><h4 class="block__label">Result</h4><p>In the demo dataset of 623 requests, 88,8% are approved, 20 are pending approval, 6 need revision, and 2 are overdue; average processing time is 0,9 business days.</p></div>
+                <div class="block"><h4 class="block__label">Tech</h4><p>Excel, PostgreSQL, SQL, JavaScript.</p></div>
+              </div>
+              <ul class="stats">
+                <li class="stat"><strong class="stat__value" data-stat="rtoMonitoring.requests">623</strong><span class="stat__label">requests</span></li>
+                <li class="stat"><strong class="stat__value" data-stat="rtoMonitoring.approved">88,8%</strong><span class="stat__label">approved</span></li>
+                <li class="stat"><strong class="stat__value" data-stat="rtoMonitoring.avgDays">0,9</strong><span class="stat__label">avg processing days</span></li>
+              </ul>
+              <div class="card__links">
+                <a class="btn btn--primary" href="https://rto-request-monitoring.vercel.app/" data-link="rtoDemo" target="_blank" rel="noopener noreferrer">Open live demo<span class="sr-only"> (opens in new tab)</span></a>
+              </div>
+            </article>
+
+          </div>
+
+          <p class="more-work"><a class="text-link" href="https://github.com/FajriAnnor" data-link="github" target="_blank" rel="noopener noreferrer">More work on GitHub →<span class="sr-only"> (opens in new tab)</span></a></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXPERIENCE (real work — no synthetic tag) -->
+    <section class="section" id="experience">
+      <div class="section__inner reveal">
+        <h2 class="label">My experience</h2>
+        <div class="section__body">
+          <p class="statement">Real work, real systems.</p>
+
+          <div class="cards">
+
+            <article class="card" aria-labelledby="e1-title">
+              <div class="card__head">
+                <div>
+                  <h3 class="card__title" id="e1-title">WEDISON</h3>
+                  <p class="card__category">Data &amp; Operations Specialist</p>
+                  <p class="card__dates" data-dates="wedison" hidden></p>
+                </div>
+              </div>
+              <div class="blocks">
+                <div class="block"><h4 class="block__label">Problem</h4><p>Finding old customer records took a long time, RTO requests were handled on paper, and management had no quick way to see sales numbers by month and by branch.</p></div>
+                <div class="block"><h4 class="block__label">Solution</h4><p>I built an internal monitoring system so any user can search customer data easily. I moved the RTO request process from paper to a web-based system. I also built a sales dashboard so I can show management results from previous months across multiple branches.</p></div>
+                <div class="block"><h4 class="block__label">Result</h4><p>Customer data is now easy for other users to find on their own. RTO requests run through a web system instead of paper. Management can pull monthly, branch-level sales figures on demand. Alongside this I prepare and submit about 150 STNK and BPKB applications per month (average) and handle up to 236 RTO requests per month.</p></div>
+                <div class="block"><h4 class="block__label">Tech</h4><p>SQL, Python (data cleaning), Tableau (visualization).</p></div>
+              </div>
+              <ul class="stats">
+                <li class="stat"><strong class="stat__value" data-stat="wedison.stnkBpkb">~150</strong><span class="stat__label">STNK &amp; BPKB applications / month (avg)</span></li>
+                <li class="stat"><strong class="stat__value" data-stat="wedison.rto">up to 236</strong><span class="stat__label">RTO requests / month</span></li>
+                <li class="stat"><strong class="stat__value" data-stat="wedison.process">Paper → Web</strong><span class="stat__label">RTO process</span></li>
+              </ul>
+            </article>
+
+            <article class="card" aria-labelledby="e2-title">
+              <div class="card__head">
+                <div>
+                  <h3 class="card__title" id="e2-title">CV Berkah Jaya Mandiri</h3>
+                  <p class="card__category">Data &amp; Administration Specialist</p>
+                  <p class="card__dates" data-dates="berkah" hidden></p>
+                </div>
+              </div>
+              <div class="blocks">
+                <div class="block"><h4 class="block__label">Problem</h4><p>Sales data had to be managed, kept reliable and turned into figures the owner could use for decisions.</p></div>
+                <div class="block"><h4 class="block__label">Solution</h4><p>I managed the sales database and built dashboards for the owner. As the person in charge (PIC) for the area, I produced the sales trend report every month.</p></div>
+                <div class="block"><h4 class="block__label">Result</h4><p>The owner used my dashboards for decisions, and a monthly sales trend report was delivered every month on a fixed schedule.</p></div>
+                <div class="block"><h4 class="block__label">Tech</h4><p>Excel dashboards, sales database management.</p></div>
+              </div>
+              <ul class="stats">
+                <li class="stat"><strong class="stat__value" data-stat="berkah.records">~3,000</strong><span class="stat__label">sales records managed</span></li>
+                <li class="stat"><strong class="stat__value" data-stat="berkah.products">~200</strong><span class="stat__label">products managed</span></li>
+                <li class="stat"><strong class="stat__value" data-stat="berkah.branches">2</strong><span class="stat__label">branches</span></li>
+                <li class="stat"><strong class="stat__value" data-stat="berkah.report">Monthly</strong><span class="stat__label">trend report to the owner</span></li>
+              </ul>
+            </article>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section class="section section--band" id="contact">
+      <div class="section__inner reveal">
+        <h2 class="label">Get in touch</h2>
+        <div class="section__body">
+          <p class="statement">Open to data and analytics opportunities. Let's talk.</p>
+          <dl class="contact-list">
+            <div class="contact-row"><dt>Email</dt><dd><a class="text-link" href="mailto:fajriaanr@gmail.com" data-link="email">fajriaanr@gmail.com</a></dd></div>
+            <div class="contact-row"><dt>LinkedIn</dt><dd><a class="text-link" href="https://www.linkedin.com/in/fajri-3367772bb/" data-link="linkedin" target="_blank" rel="noopener noreferrer">linkedin.com/in/fajri-3367772bb<span class="sr-only"> (opens in new tab)</span></a></dd></div>
+            <div class="contact-row"><dt>GitHub</dt><dd><a class="text-link" href="https://github.com/FajriAnnor" data-link="github" target="_blank" rel="noopener noreferrer">github.com/FajriAnnor<span class="sr-only"> (opens in new tab)</span></a></dd></div>
+          </dl>
+          <p class="contact-cta"><a class="btn btn--primary" href="mailto:fajriaanr@gmail.com" data-link="email">Send email</a></p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="footer__inner">
+      <p class="footer__copy">© 2026 Fajri</p>
+      <ul class="footer__links">
+        <li><a class="text-link" href="https://www.linkedin.com/in/fajri-3367772bb/" data-link="linkedin" target="_blank" rel="noopener noreferrer">LinkedIn<span class="sr-only"> (opens in new tab)</span></a></li>
+        <li><a class="text-link" href="https://github.com/FajriAnnor" data-link="github" target="_blank" rel="noopener noreferrer">GitHub<span class="sr-only"> (opens in new tab)</span></a></li>
+        <li><a class="text-link" href="mailto:fajriaanr@gmail.com" data-link="email">Email</a></li>
+      </ul>
+    </div>
+  </footer>
+
+</body>
+</html>
