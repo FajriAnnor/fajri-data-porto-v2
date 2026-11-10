@@ -28,6 +28,13 @@ Only build what is listed in the brief's sections 4–7 (visual design, page sec
 2. Projects and Experience: big stacked headings (`PROJECT`, `MY EXPERIENCE`, same words and same subtitles) and full-width Mac-style windows. The three project cards get the same window chrome with decorative address labels `business intelligence`, `reporting automation`, `operations analytics`.
 3. About: new right column labelled `CURRENTLY LEARNING` with two "IN PROGRESS" cards titled `Python for Data Cleaning & Automation` and `Advanced SQL & Analytical Workflows`. These are learning items, NOT certifications. No logos, bookmark icons, issuer names or "View" buttons (the card component may support an optional footer that stays unused until real certificates exist).
 
+**Allowed addition (window controls — EXPERIMENT, branch `window-controls` only) — exactly this, nothing more:** the three dots on the Mac-style windows (2 Experience + 3 Project) become working controls, one shared implementation (`public/js/windows.js` + one CSS block), progressive enhancement (without JS the dots stay decorative `aria-hidden` spans; JS swaps in real `<button type="button">` of identical size/position, ≥24×24px hit area, no layout shift).
+- Red = close: window animates out (~250ms) and is replaced in the same grid cell by a "Reopen <window title>" chip button (≥40px high, red dot). Not persisted; each window independent.
+- Yellow = minimize toggle: body collapses to the title bar (~260ms), body `inert`, `aria-expanded`/`aria-controls` synced; collapsed Experience window aligns to the top of its cell.
+- Green = zoom: native `<dialog>` + `showModal()` with a clone of the window (ids stripped, always expanded); its three dots all close it; Esc, click outside, scroll lock, focus returns to the green button; full screen below 768px; clone removed on close.
+- macOS hover glyphs (×, −, +) on pointer devices only; `:focus-visible` ring; `prefers-reduced-motion`: no animation.
+- Only new text allowed: the aria-labels (`Close/Minimize/Zoom <window title>`) and the chip label (`Reopen <window title>`). No copy, number, link or date changes. Address pills stay decorative. No other file or feature is touched (hero slice, loader, counter, contact form, nav, server).
+
 Everything else stays untouched: nav, Expertise, Contact and form, loader, counter, API, server, all project/experience texts and numbers, links, dates, resume link, SEO/meta.
 
 If something extra would help, list it as a suggestion at the end of the report. Do not implement it.

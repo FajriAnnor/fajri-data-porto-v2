@@ -791,6 +791,116 @@ main:focus { outline: none; }
   .window--project .block__label { padding-top: 3px; }
 }
 
+/* ---------- Window controls (enhanced by js/windows.js; without JS the dots stay decorative) ---------- */
+
+.window[hidden], .window .window__body[hidden], .window-chip[hidden] { display: none; }
+
+/* Real buttons: exactly the size and place of the decorative dots (12px, 8px gap) */
+.window__dots .dot {
+  position: relative;
+  display: block;
+  flex: none;
+  width: 12px; height: 12px;
+  margin: 0; padding: 0;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  color: #000;
+  -webkit-tap-highlight-color: transparent;
+}
+/* 24x24px hit area without changing the visual size or spacing */
+.window__dots .dot::before { content: ""; position: absolute; inset: -6px; }
+.window__dots .dot svg {
+  position: absolute; inset: 0;
+  width: 12px; height: 12px;
+  opacity: 0;
+  pointer-events: none;
+}
+.window__dots .dot:active { filter: brightness(.82); }
+.window__dots .dot:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.window__dots .dot:focus-visible svg { opacity: .6; }
+@media (hover: hover) and (pointer: fine) {
+  .window__dots:hover .dot svg { opacity: .6; }
+}
+
+/* Minimize / close animations (heights are set inline by the script) */
+.window.is-anim {
+  transition: height .26s cubic-bezier(.4, 0, .2, 1), opacity .25s ease, transform .25s ease, box-shadow .2s ease;
+}
+.window.is-gone,
+.window.is-gone:hover { opacity: 0; transform: scale(.96); }
+.windows:not(.windows--stack) > .window.is-min { align-self: start; }
+
+/* Reopen chip: takes the grid cell of the closed window */
+.window-chip {
+  justify-self: start;
+  align-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 18px 0 14px;
+  font: inherit;
+  font-size: .9375rem;
+  font-weight: 600;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, .04), 0 6px 16px rgba(0, 0, 0, .07);
+  cursor: pointer;
+  animation: chip-in .2s ease;
+}
+.window-chip:hover { background: #f5f5f5; }
+.window-chip:active { transform: scale(.98); }
+.window-chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.window-chip__dot { width: 12px; height: 12px; border-radius: 50%; background: #ff5f57; flex: none; }
+@keyframes chip-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+/* Zoom (focus view): native <dialog> holding a clone of the window */
+html.zoom-lock { overflow: hidden; scrollbar-gutter: stable; }
+dialog.zoom {
+  width: min(960px, 92vw);
+  max-width: none;
+  max-height: 88vh;
+  margin: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: #fff;
+  color: inherit;
+  overflow: auto;
+  overscroll-behavior: contain;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, .35);
+  animation: zoom-in .18s ease-out;
+}
+dialog.zoom::backdrop {
+  background: rgba(0, 0, 0, .45);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  animation: zoom-fade .18s ease-out;
+}
+dialog.zoom .window,
+dialog.zoom .window:hover {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: visible;
+  transform: none;
+  transition: none;
+}
+dialog.zoom .window__bar { position: sticky; top: 0; z-index: 2; }
+@keyframes zoom-in { from { opacity: 0; transform: scale(.97); } to { opacity: 1; transform: none; } }
+@keyframes zoom-fade { from { opacity: 0; } to { opacity: 1; } }
+@media (max-width: 767px) {
+  dialog.zoom {
+    width: 100vw; height: 100dvh;
+    max-height: none;
+    margin: 0;
+    border-radius: 0;
+  }
+}
+
 /* ---------- Contact ---------- */
 
 .contact {
@@ -1007,6 +1117,8 @@ main:focus { outline: none; }
   .btn, .nav__link, .form__submit { transition: none; }
   .window { transition: none; }
   .window:hover { transform: none; }
+  .window.is-anim { transition: none; }
+  .window-chip, dialog.zoom, dialog.zoom::backdrop { animation: none; }
   .nav__indicator.is-ready,
   .nav__indicator.is-ready[data-dir="left"] { transition: none; }
 }
