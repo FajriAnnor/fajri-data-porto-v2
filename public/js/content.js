@@ -24,6 +24,14 @@ window.SITE = {
     berkah: { records: '~3,000', products: '~200', branches: '2', report: 'Monthly' }
   },
 
+  // About > "Currently learning" cards (rendered from here when JS runs; index.html has the same two as a no-JS copy).
+  // `issuer` and `url` are optional: give an entry both and its card shows a footer row (issuer + "View" link).
+  // Leave them empty for now.
+  learning: [
+    { status: 'In progress', title: 'Python for Data Cleaning & Automation', issuer: '', url: '' },
+    { status: 'In progress', title: 'Advanced SQL & Analytical Workflows', issuer: '', url: '' }
+  ],
+
   // Leave empty to hide. A date is only rendered when a value is provided.
   dates: {
     wedison: '',

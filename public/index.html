@@ -16,7 +16,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap">
   <link rel="stylesheet" href="/css/style.css">
 
   <!-- Runs before first paint: flags JS support and decides whether the intro loader shows
@@ -74,13 +74,18 @@
     <section class="hero" id="home">
       <div class="hero__inner">
         <div class="hero__text">
-          <p class="hero__label">Data Analyst</p>
-          <h1 class="hero__name">Fajri</h1>
+          <p class="hero__label"><span>Data Analyst ·</span> <span>Business Intelligence ·</span> <span>Reporting Automation</span></p>
+          <!-- main.js adds decorative aria-hidden copies of the name for the scroll slice effect -->
+          <div class="hero__namewrap" id="heroNameWrap">
+            <h1 class="hero__name">Fajri</h1>
+          </div>
           <p class="hero__sentence">I turn operational data into dashboards and reports people can act on.</p>
           <div class="hero__actions">
-            <a class="btn" href="https://www.linkedin.com/in/fajri-3367772bb/" data-link="linkedin" target="_blank" rel="noopener noreferrer">LinkedIn<span class="sr-only"> (opens in new tab)</span></a>
-            <a class="btn" href="https://github.com/FajriAnnor" data-link="github" target="_blank" rel="noopener noreferrer">GitHub<span class="sr-only"> (opens in new tab)</span></a>
-            <a class="btn btn--primary" href="#projects">View my work</a>
+            <div class="hero__pills">
+              <a class="btn" href="https://www.linkedin.com/in/fajri-3367772bb/" data-link="linkedin" target="_blank" rel="noopener noreferrer">LinkedIn<span class="sr-only"> (opens in new tab)</span></a>
+              <a class="btn" href="https://github.com/FajriAnnor" data-link="github" target="_blank" rel="noopener noreferrer">GitHub<span class="sr-only"> (opens in new tab)</span></a>
+            </div>
+            <a class="btn btn--hero" href="#projects">View my work</a>
           </div>
           <p class="hero__resume"><a class="text-link" href="/resume/Fajri_Resume.pdf" data-link="resume" download>Download resume</a></p>
         </div>
@@ -95,12 +100,24 @@
 
     <!-- ABOUT -->
     <section class="section section--band" id="about">
-      <div class="section__inner reveal">
-        <h2 class="label">About me</h2>
-        <div class="section__body">
-          <p class="statement">I care about data that people can trust and actually use.</p>
-          <p class="body-text">I work with operational data day to day — vehicle registration (STNK/BPKB) processing, rental-to-own (RTO) request workflows, and sales reporting across branches. I build the systems and dashboards that make that data easy to find, check, and act on.</p>
-          <p class="body-text">Before that I managed a sales database and reported monthly sales trends to the owner. I clean data with SQL and Python and present it in Tableau and Excel.</p>
+      <div class="about reveal">
+        <h2 class="about__title">About me</h2>
+        <div class="about__main">
+          <p class="about__statement">I care about data that people can trust and actually use.</p>
+          <div class="about__cols">
+            <div class="about__text">
+              <p>I work with operational data day to day — vehicle registration (STNK/BPKB) processing, rental-to-own (RTO) request workflows, and sales reporting across branches. I build the systems and dashboards that make that data easy to find, check, and act on.</p>
+              <p>Before that I managed a sales database and reported monthly sales trends to the owner. I clean data with SQL and Python and present it in Tableau and Excel.</p>
+            </div>
+            <!-- Rebuilt from SITE.learning in content.js when JS runs; this is the no-JS copy. -->
+            <aside class="learning" aria-labelledby="learning-label">
+              <h3 class="learning__label" id="learning-label">Currently learning</h3>
+              <ul class="learning__list" id="learningList">
+                <li class="lcard"><div class="lcard__body"><p class="lcard__status">In progress</p><p class="lcard__title">Python for Data Cleaning &amp; Automation</p></div></li>
+                <li class="lcard"><div class="lcard__body"><p class="lcard__status">In progress</p><p class="lcard__title">Advanced SQL &amp; Analytical Workflows</p></div></li>
+              </ul>
+            </aside>
+          </div>
         </div>
       </div>
     </section>
@@ -125,14 +142,20 @@
 
     <!-- PROJECTS (synthetic demo data) -->
     <section class="section section--band" id="projects">
-      <div class="section__inner reveal">
-        <h2 class="label">Project</h2>
-        <div class="section__body">
-          <p class="statement">Three projects built to show how I work. All data is synthetic.</p>
+      <div class="stack reveal">
+        <header class="stack__head">
+          <h2 class="stack__title">Project</h2>
+          <p class="stack__sub">Three projects built to show how I work. All data is synthetic.</p>
+        </header>
 
-          <div class="cards">
-
-            <article class="project" aria-labelledby="p1-title">
+        <div class="windows windows--stack">
+        <article class="window window--project" aria-labelledby="p1-title">
+          <div class="window__bar" aria-hidden="true">
+            <span class="window__dots"><i class="dot--red"></i><i class="dot--yellow"></i><i class="dot--green"></i></span>
+            <span class="window__address"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="6.8" cy="6.8" r="4.6"/><path d="M10.4 10.4 14 14"/></svg>business intelligence</span>
+            <span></span>
+          </div>
+          <div class="window__body">
               <div class="card__head">
                 <div>
                   <h3 class="card__title" id="p1-title">WEDISON Operations Analytics</h3>
@@ -154,9 +177,16 @@
               <div class="card__links">
                 <a class="btn btn--primary" href="https://public.tableau.com/app/profile/fajri.annor/viz/WEDISON_Synthetic_Portfolio/WEDISONEXECUTIVEDASHBOARD" data-link="tableau" target="_blank" rel="noopener noreferrer">Open live dashboard<span class="sr-only"> (opens in new tab)</span></a>
               </div>
-            </article>
+          </div>
+        </article>
 
-            <article class="project" aria-labelledby="p2-title">
+        <article class="window window--project" aria-labelledby="p2-title">
+          <div class="window__bar" aria-hidden="true">
+            <span class="window__dots"><i class="dot--red"></i><i class="dot--yellow"></i><i class="dot--green"></i></span>
+            <span class="window__address"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="6.8" cy="6.8" r="4.6"/><path d="M10.4 10.4 14 14"/></svg>reporting automation</span>
+            <span></span>
+          </div>
+          <div class="window__body">
               <div class="card__head">
                 <div>
                   <h3 class="card__title" id="p2-title">Automated Sales Reporting</h3>
@@ -178,9 +208,16 @@
               <div class="card__links">
                 <a class="btn" href="https://github.com/FajriAnnor/automated-sales-reporting" data-link="salesReportingRepo" target="_blank" rel="noopener noreferrer">View on GitHub<span class="sr-only"> (opens in new tab)</span></a>
               </div>
-            </article>
+          </div>
+        </article>
 
-            <article class="project" aria-labelledby="p3-title">
+        <article class="window window--project" aria-labelledby="p3-title">
+          <div class="window__bar" aria-hidden="true">
+            <span class="window__dots"><i class="dot--red"></i><i class="dot--yellow"></i><i class="dot--green"></i></span>
+            <span class="window__address"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="6.8" cy="6.8" r="4.6"/><path d="M10.4 10.4 14 14"/></svg>operations analytics</span>
+            <span></span>
+          </div>
+          <div class="window__body">
               <div class="card__head">
                 <div>
                   <h3 class="card__title" id="p3-title">RTO Request Monitoring</h3>
@@ -202,25 +239,24 @@
               <div class="card__links">
                 <a class="btn btn--primary" href="https://rto-request-monitoring.vercel.app/" data-link="rtoDemo" target="_blank" rel="noopener noreferrer">Open live demo<span class="sr-only"> (opens in new tab)</span></a>
               </div>
-            </article>
-
           </div>
-
-          <p class="more-work"><a class="text-link" href="https://github.com/FajriAnnor" data-link="github" target="_blank" rel="noopener noreferrer">More work on GitHub →<span class="sr-only"> (opens in new tab)</span></a></p>
+        </article>
         </div>
+
+        <p class="more-work"><a class="text-link" href="https://github.com/FajriAnnor" data-link="github" target="_blank" rel="noopener noreferrer">More work on GitHub →<span class="sr-only"> (opens in new tab)</span></a></p>
       </div>
     </section>
 
     <!-- EXPERIENCE (real work — no synthetic tag) -->
     <section class="section" id="experience">
-      <div class="section__inner reveal">
-        <h2 class="label">My experience</h2>
-        <div class="section__body">
-          <p class="statement">Real work, real systems.</p>
+      <div class="stack reveal">
+        <header class="stack__head">
+          <h2 class="stack__title">My experience</h2>
+          <p class="stack__sub">Real work, real systems.</p>
+        </header>
 
-          <div class="windows">
-
-            <article class="window" aria-labelledby="e1-title">
+        <div class="windows">
+        <article class="window" aria-labelledby="e1-title">
           <div class="window__bar" aria-hidden="true">
             <span class="window__dots"><i class="dot--red"></i><i class="dot--yellow"></i><i class="dot--green"></i></span>
             <span class="window__address"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="6.8" cy="6.8" r="4.6"/><path d="M10.4 10.4 14 14"/></svg>data &amp; operations</span>
@@ -243,7 +279,7 @@
           </div>
         </article>
 
-            <article class="window" aria-labelledby="e2-title">
+        <article class="window" aria-labelledby="e2-title">
           <div class="window__bar" aria-hidden="true">
             <span class="window__dots"><i class="dot--red"></i><i class="dot--yellow"></i><i class="dot--green"></i></span>
             <span class="window__address"><svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="6.8" cy="6.8" r="4.6"/><path d="M10.4 10.4 14 14"/></svg>data &amp; administration</span>
@@ -266,8 +302,6 @@
               </ul>
           </div>
         </article>
-
-          </div>
         </div>
       </div>
     </section>

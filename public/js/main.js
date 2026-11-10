@@ -11,7 +11,7 @@
   // The request is NOT aborted: if the server is slow it still finishes, so the visit is
   // counted once and the cookies are stored. Only the loader stops waiting (see below).
   function fetchVisitorNumber() {
-    return fetch('/api/visit', { cache: 'no-store', credentials: 'same-origin' })
+    return fetch('/api/visit', { cache: 'no-store' })
       .then(function (res) { return res.ok ? res.json() : null; })
       .then(function (data) { return data && Number.isInteger(data.count) ? data.count : null; })
       .catch(function () { return null; });
@@ -418,12 +418,170 @@
     timers.push(setTimeout(leave, LEAVE_AT_MS));
   }
 
+  /* ---------- About: "Currently learning" cards from content.js ---------- */
+
+  function make(tag, className, text) {
+    var node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text) node.textContent = text;
+    return node;
+  }
+
+  // Replaces the no-JS copy in index.html. An entry with `issuer` and/or `url` gets a footer row.
+  function renderLearning() {
+    var list = document.getElementById('learningList');
+    var items = site.learning;
+    if (!list || !Array.isArray(items) || !items.length) return;
+
+    list.textContent = '';
+    items.forEach(function (item) {
+      if (!item || !item.title) return;
+      var card = make('li', 'lcard');
+      var body = make('div', 'lcard__body');
+      body.appendChild(make('p', 'lcard__status', item.status || ''));
+      body.appendChild(make('p', 'lcard__title', item.title));
+      card.appendChild(body);
+
+      if (item.issuer || item.url) {
+        var footer = make('div', 'lcard__footer');
+        footer.appendChild(make('span', '', item.issuer || ''));
+        if (item.url) {
+          var view = make('a', 'lcard__view', 'View');
+          view.href = item.url;
+          view.target = '_blank';
+          view.rel = 'noopener noreferrer';
+          view.appendChild(make('span', 'sr-only', ' (opens in new tab)'));
+          footer.appendChild(view);
+        }
+        card.appendChild(footer);
+      }
+      list.appendChild(card);
+    });
+  }
+
+  /* ---------- Hero name: scroll slice effect ---------- */
+
+  // While the page scrolls, the big name splits into 5 horizontal strips that slide sideways
+  // by different amounts. The real <h1> stays in place (only its ink turns transparent), the
+  // strips are aria-hidden copies. Only transform, clip-path and opacity change; nothing in
+  // the scroll path reads layout. Off for reduced motion, below 768px and without JS.
+  function initHeroSlice() {
+    var wrap = document.getElementById('heroNameWrap');
+    var hero = document.getElementById('home');
+    var heading = wrap && wrap.querySelector('h1');
+    if (!wrap || !hero || !heading || !('IntersectionObserver' in window)) return;
+
+    var BANDS = 5;
+    var EDGE = [0, 9, -11, 8, -10, 0];   // px: the cut between two bands is slightly angled
+    var holder = make('div', 'hero__slices');
+    holder.setAttribute('aria-hidden', 'true');
+    var slices = [];
+    for (var i = 0; i < BANDS; i++) {
+      var slice = make('span', 'hero__slice', heading.textContent);
+      var topL = i === 0 ? '-30%' : 'calc(' + (i * 20) + '% - 0.5px)';
+      var topR = i === 0 ? '-30%' : 'calc(' + (i * 20) + '% + ' + (EDGE[i] - 0.5) + 'px)';
+      var botL = i === BANDS - 1 ? '130%' : 'calc(' + ((i + 1) * 20) + '% + 0.5px)';
+      var botR = i === BANDS - 1 ? '130%' : 'calc(' + ((i + 1) * 20) + '% + ' + (EDGE[i + 1] + 0.5) + 'px)';
+      slice.style.clipPath = 'polygon(-10% ' + topL + ', 110% ' + topR + ', 110% ' + botR + ', -10% ' + botL + ')';
+      holder.appendChild(slice);
+      slices.push(slice);
+    }
+    wrap.appendChild(holder);
+
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+    var narrow = window.matchMedia('(max-width: 767px)');
+    var range = 1;          // scroll distance for the full effect: 60% of the hero height
+    var heroInView = true;
+    var listening = false;
+    var lastP = -1;
+    var latestY = 0;
+    var frame = 0;
+
+    function measure() { range = Math.max(1, hero.offsetHeight * 0.6); }   // not called while scrolling
+
+    function render(p) {
+      if (p <= 0) {
+        wrap.classList.remove('is-sliced');
+        slices.forEach(function (s) { s.style.opacity = '0'; s.style.transform = ''; });
+        return;
+      }
+      wrap.classList.add('is-sliced');
+      var fade = (1 - p * 0.9).toFixed(3);
+      slices.forEach(function (s, idx) {
+        var dir = idx % 2 ? 1 : -1;
+        var dx = dir * p * (24 + idx * 14);
+        s.style.transform = 'translate3d(' + dx.toFixed(2) + 'px,0,0) skewX(' + (dir * p * 4).toFixed(2) + 'deg)';
+        s.style.opacity = fade;
+      });
+    }
+
+    function update() {
+      frame = 0;
+      var p = Math.min(1, Math.max(0, latestY / range));
+      if (p === lastP) return;
+      lastP = p;
+      render(p);
+    }
+
+    function onScroll() {
+      latestY = window.scrollY;
+      if (!frame) frame = requestAnimationFrame(update);
+    }
+
+    function start() {
+      if (!listening) {
+        listening = true;
+        window.addEventListener('scroll', onScroll, { passive: true });
+      }
+      onScroll();   // always re-apply the current position
+    }
+
+    function stop() {
+      if (!listening) return;
+      listening = false;
+      window.removeEventListener('scroll', onScroll);
+      cancelAnimationFrame(frame);
+      frame = 0;
+    }
+
+    // Decides whether the effect runs right now; when it must not, the name is plain and static.
+    function sync() {
+      if (!reduce.matches && !narrow.matches) {
+        measure();
+        if (heroInView) start();
+      } else {
+        stop();
+        lastP = -1;
+        render(0);
+      }
+    }
+
+    new IntersectionObserver(function (entries) {
+      heroInView = entries[entries.length - 1].isIntersecting;
+      if (heroInView) sync(); else stop();
+    }, { threshold: 0 }).observe(hero);
+
+    var resizeFrame = 0;
+    window.addEventListener('resize', function () {
+      cancelAnimationFrame(resizeFrame);
+      resizeFrame = requestAnimationFrame(function () { lastP = -1; sync(); });
+    });
+    reduce.addEventListener('change', sync);
+    narrow.addEventListener('change', sync);
+    window.addEventListener('load', function () { lastP = -1; sync(); });   // scroll position restored after a reload
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { lastP = -1; sync(); });
+    render(0);
+    sync();
+  }
+
   /* ---------- Init ---------- */
 
   var visitor = withinMs(fetchVisitorNumber(), 800);   // the request itself counts the visit, even if the loader is skipped
   hydrate();
+  renderLearning();
   initNav();
   initContactForm();
   initReveal();
+  initHeroSlice();
   initLoader(visitor);
 })();

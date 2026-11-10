@@ -13,7 +13,7 @@ Do NOT deploy, git push, or create commits unless the user asks.
 Only build what is listed in the brief's sections 4–7 (visual design, page sections, visitor counter, quality requirements). The following are explicitly OUT OF SCOPE for now. Do not build, stub, or add placeholders for them:
 
 - "Why I do this" section (to be decided later)
-- Certifications section (bootcamp starts 18 Nov 2026; no certificates yet)
+- Certifications section, and the words "certification" / "credential" anywhere on the page (bootcamp starts 18 Nov 2026; no certificates yet; do not add anything about the bootcamp)
 - Real photo (use the grayscale SVG placeholder; photo drops in later as `/assets/portrait.jpg`)
 - Language toggle / i18n (English only for now, but keep copy/data in one data file so translation is easy later)
 - Blog, dark mode, custom cursor, gallery, extra pages, testimonials, skill-percentage bars, project screenshots/thumbnails, tabs/carousels/accordions, analytics scripts, cookie banners, any extra animation not listed in the brief
@@ -21,6 +21,14 @@ Only build what is listed in the brief's sections 4–7 (visual design, page sec
 - Extra projects or extra experience entries beyond those listed in the brief
 
 **Allowed addition (UI polish brief):** the Contact section may contain a contact form (fields: name, email, message) with its small backend `POST /api/contact` (`lib/contact.js`, messages appended to `data/messages.jsonl`, `npm run messages` to read them). Nothing else new is allowed. Visual polish (type scale, liquid-glass nav, Mac-style experience windows, compact project cards) must not change any copy, number, link or date.
+
+**Allowed additions (UI polish round 2) — exactly these, nothing more:**
+
+1. Hero: new eyebrow `DATA ANALYST · BUSINESS INTELLIGENCE · REPORTING AUTOMATION`; bigger name, wide primary button, taller portrait slot; a scroll "slice" effect on the name (decorative `aria-hidden` copies, off for reduced motion / no JS / touch < 768px).
+2. Projects and Experience: big stacked headings (`PROJECT`, `MY EXPERIENCE`, same words and same subtitles) and full-width Mac-style windows. The three project cards get the same window chrome with decorative address labels `business intelligence`, `reporting automation`, `operations analytics`.
+3. About: new right column labelled `CURRENTLY LEARNING` with two "IN PROGRESS" cards titled `Python for Data Cleaning & Automation` and `Advanced SQL & Analytical Workflows`. These are learning items, NOT certifications. No logos, bookmark icons, issuer names or "View" buttons (the card component may support an optional footer that stays unused until real certificates exist).
+
+Everything else stays untouched: nav, Expertise, Contact and form, loader, counter, API, server, all project/experience texts and numbers, links, dates, resume link, SEO/meta.
 
 If something extra would help, list it as a suggestion at the end of the report. Do not implement it.
 
