@@ -330,16 +330,16 @@ main:focus { outline: none; }
 /* Stacked header for Projects and Experience: big heading, subtitle, full-width content */
 .stack { max-width: var(--maxw); margin: 0 auto; }
 .stack__title {
-  font-size: clamp(2.75rem, 5.2vw, 4.75rem);
+  font-size: clamp(1.75rem, 3vw, 2.75rem);
   font-weight: 800;
   line-height: .95;
   letter-spacing: -.03em;
   text-transform: uppercase;
 }
 .stack__sub {
-  margin-top: 14px;
+  margin-top: 4px;
   max-width: 60ch;
-  font-size: clamp(1.1rem, 1.5vw, 1.25rem);
+  font-size: clamp(.975rem, calc(1.5vw - 2px), 1.125rem);
   line-height: 1.4;
   color: var(--muted);
 }
@@ -387,7 +387,7 @@ main:focus { outline: none; }
   white-space: nowrap;
 }
 @supports (font-size: 1cqw) {
-  .hero__namewrap { font-size: max(3.5rem, min(35cqw, 36vh)); }
+  .hero__namewrap { font-size: max(3.5rem, min(22cqw, 24vh)); }
 }
 .hero__name { font: inherit; letter-spacing: inherit; }
 
@@ -398,7 +398,7 @@ main:focus { outline: none; }
 .hero__namewrap.is-sliced .hero__slice { will-change: transform, opacity; }
 
 .hero__sentence {
-  max-width: 34rem;
+  max-width: 40rem;
   margin-top: clamp(12px, 2.4vh, 24px);
   font-size: clamp(1.1rem, 1.5vw, 1.35rem);
   line-height: 1.35;

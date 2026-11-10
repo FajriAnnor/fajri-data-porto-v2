@@ -44,7 +44,7 @@ Tech stack is fixed: no framework, no build step, no CSS framework, no npm UI li
 - Dates not provided stay empty in the data file and are simply not rendered. No placeholder text like "TBD" or "Lorem ipsum" anywhere visible.
 - Wording for numbers: "average" and "up to" must be preserved exactly as given in the brief.
 - Do NOT claim any time saved or company-wide adoption numbers for the WEDISON experience.
-- CV Berkah Jaya Mandiri tech line: only "Excel dashboards, sales database management". Add no tool that was not listed.
+- CV Berkah Jaya Mandiri tech line: only "Excel dashboards, SQL, Power BI, sales database management" (updated by the user). Tableau was NOT used there; the user only started using Tableau in 2026. Add no tool that was not listed.
 
 ---
 
