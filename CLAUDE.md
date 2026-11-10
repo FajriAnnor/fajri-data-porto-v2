@@ -1,6 +1,6 @@
 # CLAUDE.md — Fajri Portfolio (porto-v2.1)
 
-Brand-new personal portfolio for Fajri, a Data Analyst. Plain HTML + CSS + vanilla JS, deployed on Vercel with one serverless function (`api/visit.js`) for a visitor counter.
+Brand-new personal portfolio for Fajri, a Data Analyst. Plain HTML + CSS + vanilla JS in `public/`, served by a dependency-free Node server (`server.js`) that also provides the visitor counter (`GET /api/visit`, code in `lib/`). Runs locally now and later on a VPS behind Nginx.
 This is a standalone project. Do NOT touch or reference any other existing project.
 
 When something is missing or ambiguous: STOP and ask. Never guess, never invent facts.
@@ -21,7 +21,7 @@ Only build what is listed in the brief's sections 4–7 (visual design, page sec
 
 If something extra would help, list it as a suggestion at the end of the report. Do not implement it.
 
-Tech stack is fixed: no framework, no build step, no CSS framework, no npm UI libraries. One sans-serif Google Font (Inter or Manrope) with `display=swap`. Counter storage: Upstash Redis via REST using `fetch` (env vars `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`).
+Tech stack is fixed: no framework, no build step, no CSS framework, no npm UI libraries. One sans-serif Google Font (Inter or Manrope) with `display=swap`. Server: Node built-ins only (no npm dependencies); counter stored in `data/visitors.json` behind the small `get`/`increment` interface in `lib/store.js`.
 
 ---
 

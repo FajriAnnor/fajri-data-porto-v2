@@ -1,5 +1,0 @@
-{
-  "rewrites": [
-    { "source": "/assets/portrait.jpg", "destination": "/assets/portrait.svg" }
-  ]
-}

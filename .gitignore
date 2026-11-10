@@ -1,10 +1,12 @@
-# Secrets — never commit
+# Secrets / local config — never commit
 .env
 .env.local
 .env.*.local
 
-# Vercel CLI local state
-.vercel
-
 # Dependencies
 node_modules
+
+# Runtime counter data (keep the folder via .gitkeep)
+data/*.json
+data/*.corrupt-*
+data/*.tmp
