@@ -11,3 +11,6 @@ data/*.json
 data/*.corrupt-*
 data/*.tmp
 data/*.jsonl
+
+# Scratch prompts used while building (never commit)
+PROMPT-*.md

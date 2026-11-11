@@ -1,0 +1,10 @@
+{
+  "framework": null,
+  "buildCommand": null,
+  "installCommand": null,
+  "outputDirectory": "public",
+  "redirects": [
+    { "source": "/projects/:slug*", "destination": "/#projects", "permanent": false },
+    { "source": "/cv/fajri-cv.pdf", "destination": "/resume/Fajri_Resume.pdf", "permanent": false }
+  ]
+}
