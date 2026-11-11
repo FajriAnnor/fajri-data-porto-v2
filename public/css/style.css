@@ -449,7 +449,7 @@ main:focus { outline: none; }
   object-fit: cover;
   border-radius: 12px;
   background: #e4e4e4;
-  filter: grayscale(1);
+  filter: grayscale(.8);
 }
 
 @media (min-width: 900px) {
